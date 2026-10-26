@@ -1,0 +1,19 @@
+{
+  "name": "imovies-workspace",
+  "version": "1.0.0",
+  "private": true,
+  "description": "IMovies — Full-Stack Movie Ticket Booking System",
+  "scripts": {
+    "install:all": "npm install && npm install --prefix server && npm install --prefix client",
+    "server": "npm run dev --prefix server",
+    "client": "npm run dev --prefix client",
+    "dev": "concurrently -n \"SERVER,CLIENT\" -c \"cyan,magenta\" \"npm run server\" \"npm run client\"",
+    "build:client": "npm run build --prefix client",
+    "seed:admin": "npm run seed:admin --prefix server",
+    "seed:data": "npm run seed:data --prefix server",
+    "start": "npm start --prefix server"
+  },
+  "devDependencies": {
+    "concurrently": "^9.1.2"
+  }
+}

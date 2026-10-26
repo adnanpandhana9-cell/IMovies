@@ -1,0 +1,43 @@
+# Node modules
+node_modules/
+client/node_modules/
+server/node_modules/
+
+# Environment files - ignore all real environment files
+.env
+.env.*
+.env.local
+.env.*.local
+server/.env
+server/.env.*
+client/.env
+client/.env.*
+client/.env.local
+
+# Always track example templates
+!.env.example
+!server/.env.example
+!client/.env.example
+
+# Build output
+client/dist/
+server/dist/
+dist/
+build/
+
+# Logs
+npm-debug.log*
+yarn-debug.log*
+yarn-error.log*
+logs/
+*.log
+
+# Editor / OS files
+.vscode/
+.idea/
+.DS_Store
+Thumbs.db
+
+# Test coverage
+coverage/
+.nyc_output/
