@@ -25,25 +25,59 @@ dotenv.config({ path: path.resolve(__dirname, '.env') });
 const app = express();
 
 // Security Headers with Helmet
-app.use(helmet());
-
-// CORS Configuration
-const allowedOrigin = process.env.CLIENT_URL || 'http://localhost:5173';
 app.use(
-  cors({
-    origin: (origin, callback) => {
-      // Allow requests with no origin (e.g. mobile apps, curl, Postman) or matching origin
-      if (!origin || origin === allowedOrigin) {
-        callback(null, true);
-      } else {
-        callback(new Error(`Origin ${origin} not allowed by CORS`));
-      }
-    },
-    credentials: true,
-    methods: ['GET', 'POST', 'PUT', 'DELETE', 'PATCH', 'OPTIONS'],
-    allowedHeaders: ['Content-Type', 'Authorization'],
+  helmet({
+    crossOriginResourcePolicy: { policy: 'cross-origin' },
   })
 );
+
+// CORS Configuration
+export const getAllowedOrigins = () => {
+  const defaultAllowedOrigins = [
+    'http://localhost:5173',
+    'http://localhost:3000',
+    'http://127.0.0.1:5173',
+    'https://imovies-two-delta.vercel.app',
+    'https://imovies-9uwd3ztpc-adnanpandhana9-cells-projects.vercel.app',
+  ];
+
+  const envOrigins = (process.env.CLIENT_URL || '')
+    .split(',')
+    .map((url) => url.trim().replace(/\/+$/, ''))
+    .filter(Boolean);
+
+  return Array.from(new Set([...defaultAllowedOrigins, ...envOrigins]));
+};
+
+export const isOriginAllowed = (origin) => {
+  if (!origin) return true; // Allow non-browser clients (curl, mobile apps, Postman)
+  const normalizedOrigin = origin.trim().replace(/\/+$/, '');
+  const allowed = getAllowedOrigins();
+  if (allowed.includes(normalizedOrigin)) return true;
+  if (process.env.NODE_ENV !== 'production') {
+    if (/^https?:\/\/(localhost|127\.0\.0\.1)(:\d+)?$/.test(normalizedOrigin)) {
+      return true;
+    }
+  }
+  return false;
+};
+
+export const corsOptions = {
+  origin: (origin, callback) => {
+    if (isOriginAllowed(origin)) {
+      callback(null, true);
+    } else {
+      callback(null, false);
+    }
+  },
+  credentials: true,
+  methods: ['GET', 'POST', 'PUT', 'DELETE', 'PATCH', 'OPTIONS'],
+  allowedHeaders: ['Content-Type', 'Authorization'],
+  optionsSuccessStatus: 204,
+};
+
+app.use(cors(corsOptions));
+app.options('*', cors(corsOptions));
 
 // Global Rate Limiting: 200 requests per 15 minutes per IP
 const globalLimiter = rateLimit({
