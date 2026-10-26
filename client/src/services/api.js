@@ -1,11 +1,34 @@
 import axios from 'axios';
 
-// Central Axios API instance
-const API_BASE_URL = import.meta.env.VITE_API_BASE_URL || 'http://localhost:5000/api';
+/**
+ * Resolves the API base URL cleanly:
+ * 1. Checks VITE_API_BASE_URL first.
+ * 2. Checks VITE_API_URL as secondary.
+ * 3. Falls back to production Render backend in production mode.
+ * 4. Falls back to localhost:5000 only in local development mode.
+ * 5. Normalizes trailing slashes and ensures /api is present without duplication.
+ */
+const resolveBaseUrl = () => {
+  let url = import.meta.env.VITE_API_BASE_URL || import.meta.env.VITE_API_URL;
+
+  if (!url || typeof url !== 'string' || url.trim() === '') {
+    url = import.meta.env.PROD
+      ? 'https://imovies-76zp.onrender.com/api'
+      : 'http://localhost:5000/api';
+  }
+
+  // Strip trailing slashes
+  url = url.trim().replace(/\/+$/, '');
+
+  // Ensure /api is the endpoint base without duplicating
+  return url.endsWith('/api') ? url : `${url}/api`;
+};
+
+export const API_BASE_URL = resolveBaseUrl();
 
 const api = axios.create({
   baseURL: API_BASE_URL,
-  timeout: 10000,
+  timeout: 15000,
   withCredentials: true,
   headers: {
     'Content-Type': 'application/json',
@@ -29,7 +52,6 @@ api.interceptors.response.use(
   (response) => response,
   (error) => {
     if (error.response) {
-      // If server returns 401 and token is expired/invalid, clear local token
       if (error.response.status === 401) {
         const message = error.response.data?.message || '';
         if (message.includes('expired') || message.includes('token') || message.includes('denied')) {
@@ -68,7 +90,7 @@ export const checkHealth = async () => {
     }
     return {
       online: false,
-      error: error.message,
+      error: error.message || 'Backend server is unreachable',
       data: null,
       statusCode: 0,
     };

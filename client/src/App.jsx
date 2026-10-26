@@ -37,7 +37,7 @@ function AppContent() {
         } else if (res.online) {
           toast.warning('Express API online, but MongoDB Atlas is not yet connected.');
         } else {
-          toast.error('Unable to reach backend server at http://localhost:5000');
+          toast.error('Unable to reach backend API server. Please check your network connection.');
         }
       }
     } catch (err) {

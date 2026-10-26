@@ -119,7 +119,7 @@ const HomePage = ({ healthStatus, onRefreshHealth, isChecking }) => {
                       <h5 className="mb-0 fw-semibold text-white">Express Backend API</h5>
                     </div>
                     <span className={`badge ${isApiOnline ? 'bg-success' : 'bg-danger'} px-3 py-2`}>
-                      {isApiOnline ? 'ONLINE (Port 5000)' : 'OFFLINE'}
+                      {isApiOnline ? 'ONLINE' : 'OFFLINE'}
                     </span>
                   </div>
 
@@ -136,11 +136,17 @@ const HomePage = ({ healthStatus, onRefreshHealth, isChecking }) => {
                     </li>
                     <li className="mb-2 d-flex justify-content-between">
                       <span>Environment:</span>
-                      <strong className="text-light">{healthStatus?.data?.environment || 'development'}</strong>
+                      <strong className="text-light">
+                        {isApiOnline ? healthStatus?.data?.environment : 'Unavailable'}
+                      </strong>
                     </li>
                     <li className="d-flex justify-content-between">
                       <span>Uptime:</span>
-                      <strong className="text-light">{healthStatus?.data?.uptime ? `${healthStatus.data.uptime}s` : 'N/A'}</strong>
+                      <strong className="text-light">
+                        {isApiOnline && healthStatus?.data?.uptime !== undefined
+                          ? `${healthStatus.data.uptime}s`
+                          : 'Unavailable'}
+                      </strong>
                     </li>
                   </ul>
                 </div>
@@ -156,10 +162,10 @@ const HomePage = ({ healthStatus, onRefreshHealth, isChecking }) => {
                     </div>
                     <span
                       className={`badge ${
-                        isDbConnected ? 'bg-success' : isApiOnline ? 'bg-warning text-dark' : 'bg-secondary'
+                        isDbConnected ? 'bg-success' : isApiOnline ? 'bg-warning text-dark' : 'bg-danger'
                       } px-3 py-2`}
                     >
-                      {isDbConnected ? 'CONNECTED' : isApiOnline ? 'DISCONNECTED' : 'WAITING'}
+                      {isDbConnected ? 'CONNECTED' : isApiOnline ? 'DISCONNECTED' : 'UNAVAILABLE'}
                     </span>
                   </div>
 
@@ -170,8 +176,8 @@ const HomePage = ({ healthStatus, onRefreshHealth, isChecking }) => {
                   <ul className="list-unstyled small text-secondary mb-3">
                     <li className="mb-2 d-flex justify-content-between">
                       <span>Connection State:</span>
-                      <strong className={isDbConnected ? 'text-success' : 'text-warning'}>
-                        {db?.state || 'disconnected'}
+                      <strong className={isDbConnected ? 'text-success' : isApiOnline ? 'text-warning' : 'text-danger'}>
+                        {isApiOnline ? (db?.state || 'disconnected') : 'Unavailable'}
                       </strong>
                     </li>
                     {isDbConnected && (
@@ -193,10 +199,15 @@ const HomePage = ({ healthStatus, onRefreshHealth, isChecking }) => {
                       <i className="bi bi-check-circle-fill me-2"></i>
                       MongoDB Atlas is fully connected and operational!
                     </div>
-                  ) : (
+                  ) : isApiOnline ? (
                     <div className="alert alert-warning py-2 px-3 small mb-0 border-0" style={{ backgroundColor: 'rgba(245, 158, 11, 0.15)', color: '#fbbf24' }}>
                       <i className="bi bi-exclamation-triangle-fill me-2"></i>
-                      <strong>Action Required:</strong> Set your <code>MONGODB_URI</code> in <code>server/.env</code>.
+                      <strong>Action Required:</strong> MongoDB Atlas is disconnected. Verify database connection string.
+                    </div>
+                  ) : (
+                    <div className="alert alert-danger py-2 px-3 small mb-0 border-0" style={{ backgroundColor: 'rgba(239, 68, 68, 0.15)', color: '#f87171' }}>
+                      <i className="bi bi-exclamation-circle-fill me-2"></i>
+                      Unable to contact the backend API server.
                     </div>
                   )}
                 </div>

@@ -73,8 +73,8 @@ const Navbar = ({ healthStatus }) => {
                 isDbConnected
                   ? 'MongoDB Atlas: Connected'
                   : isApiOnline
-                  ? 'Backend: Online | MongoDB: Disconnected (Set MONGODB_URI)'
-                  : 'Backend: Offline (Check port 5000)'
+                  ? 'Backend: Online | MongoDB: Disconnected'
+                  : 'Backend: Offline (Unable to reach API server)'
               }
             >
               <span
